@@ -1,0 +1,20 @@
+<font>
+ <info size="48" face="Clubland"/>
+ <common lineHeight="74"/>
+ <pages>
+  <page id="0" file="clubland_regular_48.png"/>
+ </pages>
+ <chars count="10">
+  <char page="0" width="33" x="1" xadvance="40" id="48" y="1" yoffset="35" letter="0" xoffset="0" chnl="0" height="39"/>
+  <char page="0" width="26" x="35" xadvance="33" id="49" y="1" yoffset="35" letter="1" xoffset="0" chnl="0" height="39"/>
+  <char page="0" width="43" x="62" xadvance="50" id="50" y="1" yoffset="35" letter="2" xoffset="0" chnl="0" height="39"/>
+  <char page="0" width="43" x="106" xadvance="50" id="51" y="1" yoffset="35" letter="3" xoffset="0" chnl="0" height="39"/>
+  <char page="0" width="39" x="150" xadvance="47" id="52" y="1" yoffset="35" letter="4" xoffset="0" chnl="0" height="39"/>
+  <char page="0" width="43" x="190" xadvance="50" id="53" y="1" yoffset="35" letter="5" xoffset="0" chnl="0" height="39"/>
+  <char page="0" width="43" x="1" xadvance="50" id="54" y="41" yoffset="35" letter="6" xoffset="0" chnl="0" height="39"/>
+  <char page="0" width="32" x="45" xadvance="40" id="55" y="41" yoffset="35" letter="7" xoffset="0" chnl="0" height="39"/>
+  <char page="0" width="43" x="78" xadvance="50" id="56" y="41" yoffset="35" letter="8" xoffset="0" chnl="0" height="39"/>
+  <char page="0" width="44" x="122" xadvance="50" id="57" y="41" yoffset="35" letter="9" xoffset="0" chnl="0" height="39"/>
+ </chars>
+ <kernings count="0"/>
+</font>
