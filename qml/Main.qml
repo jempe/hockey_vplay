@@ -25,6 +25,8 @@ GameWindow {
     //  * Add plugins to monetize, analyze & improve your apps (available with the Pro Licenses)
     //licenseKey: "<generate one from https://v-play.net/licenseKey>"
 
+    onSplashScreenFinished: world.running = true
+
     activeScene: scene
 
     // the size of the Window can be changed at runtime by pressing Ctrl (or Cmd on Mac) + the number keys 1-8
@@ -41,12 +43,33 @@ GameWindow {
         width: gameWindow.screenWidth
         height: gameWindow.screenHeight
 
+        PhysicsWorld {
+            id: world
+            // physics is disabled initially, and enabled after the splash is finished
+            running: false
+            z: 10 // draw the debugDraw on top of the entities
+
+            // these are performance settings to avoid boxes colliding too far together
+            // set them as low as possible so it still looks good
+            updatesPerSecondForPhysics: 60
+            velocityIterations: 5
+            positionIterations: 5
+            // set this to true to see the debug draw of the physics system
+            // this displays all bodies, joints and forces which is great for debugging
+            debugDrawVisible: true
+        }
+
         // This item contains example code for the chosen V-Play Plugins
         // It is hidden by default and will overlay the QML items below if shown
         PluginMainItem {
             id: pluginMainItem
             z: 1           // display the plugin example above other items in the QML code below
             visible: false // set this to true to show the plugin example
+        }
+
+        EntityManager {
+            id: entityManager
+            entityContainer: scene
         }
 
         property string imagesFolder: {
@@ -78,10 +101,47 @@ GameWindow {
                 return 130
         }
 
-       Table{
+        Table{
 
-       }
+        }
 
+        EntityBase {
+            entityId: "puck"
+            entityType: "puck"
+            anchors.centerIn: parent
 
+            Image {
+                id: puckImage
+                source: "../assets/images/" + scene.imagesFolder + "/puck.png"
+                x: puckImage.width / -2
+                y: puckImage.height / -2
+            }
+            CircleCollider {
+                radius: scene.puckSize / 2
+                friction: 0.99
+                x: scene.puckSize / -2
+                y: scene.puckSize / -2
+            }
+        }
+
+        EntityBase {
+            entityId: "mallet"
+            entityType: "mallet"
+            x: gameWindow.width / 2
+            y: gameWindow.height * 0.75
+
+            Image {
+                id: malletImage
+                source: "../assets/images/" + scene.imagesFolder + "/mallet.png"
+                x: malletImage.width / -2
+                y: malletImage.height / -2
+            }
+            CircleCollider {
+                radius: scene.puckSize
+                friction: 0.99
+                x: scene.puckSize * -1
+                y: scene.puckSize * -1
+            }
+        }
     }
 }
