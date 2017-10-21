@@ -25,7 +25,7 @@ GameWindow {
     //  * Add plugins to monetize, analyze & improve your apps (available with the Pro Licenses)
     //licenseKey: "<generate one from https://v-play.net/licenseKey>"
 
-    onSplashScreenFinished: world.running = true
+    onSplashScreenFinished: physicsWorld.running = true
 
     activeScene: scene
 
@@ -44,7 +44,7 @@ GameWindow {
         height: gameWindow.screenHeight
 
         PhysicsWorld {
-            id: world
+            id: physicsWorld
             // physics is disabled initially, and enabled after the splash is finished
             running: false
             z: 10 // draw the debugDraw on top of the entities
@@ -101,14 +101,73 @@ GameWindow {
                 return 130
         }
 
-        Table{
+        property double wallsWidth: puckSize * 0.45
 
+        property double redCircleRadius: puckSize * 2.35
+
+        property double tableCornerRadius: puckSize * 0.47
+
+        Table{
+            id: table
+        }
+
+        Component {
+            id: mouseJoint
+            MouseJoint {
+
+                maxForce: 300000
+                // The damping ratio. 0 = no damping, 1 = critical damping. Default is 0.7
+                dampingRatio: 1
+                // The response speed, default is 5
+                frequencyHz: 5
+
+                //collideConnected: true // collideConnected is only needed, if 2 bodies are connected with a MouseJoint and those should collide or not - but the typical use case for a MouseJoint is that only 1 body is affected, which should be pulled towards a targetPoint
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+
+            property Body selectedBody: null
+            property MouseJoint mouseJointWhileDragging: null
+
+            onPressed: {
+
+                selectedBody = physicsWorld.bodyAt(Qt.point(mouseX, mouseY));
+                console.debug("selected body at position", mouseX, mouseY, ":", selectedBody);
+                if(selectedBody) {
+                    mouseJointWhileDragging = mouseJoint.createObject(physicsWorld)
+
+                    // set the target point to the current mouse position
+                    mouseJointWhileDragging.target = Qt.point(mouseX, mouseY)
+
+                    // set the body to move to the currently selected one
+                    mouseJointWhileDragging.bodyB = selectedBody
+
+                }
+            }
+
+            onPositionChanged: {
+                if (mouseJointWhileDragging)
+                    mouseJointWhileDragging.target = Qt.point(mouseX, mouseY)
+            }
+
+            onReleased: {
+                // if the user pressed a body initially, don't create a new box but remove the created MouseJoint
+                if(selectedBody) {
+
+                    selectedBody = null
+                    if (mouseJointWhileDragging)
+                        mouseJointWhileDragging.destroy()
+                }
+            }
         }
 
         EntityBase {
             entityId: "puck"
             entityType: "puck"
-            anchors.centerIn: parent
+            x: gameWindow.width / 2
+            y: table.height / 2
 
             Image {
                 id: puckImage
@@ -118,9 +177,12 @@ GameWindow {
             }
             CircleCollider {
                 radius: scene.puckSize / 2
-                friction: 0.99
+                friction: 0.1
+                restitution: 1
                 x: scene.puckSize / -2
                 y: scene.puckSize / -2
+                collidesWith: Circle.Category1
+
             }
         }
 
@@ -138,9 +200,110 @@ GameWindow {
             }
             CircleCollider {
                 radius: scene.puckSize
-                friction: 0.99
+                friction: 0
                 x: scene.puckSize * -1
                 y: scene.puckSize * -1
+                categories: Circle.Category1
+            }
+        }
+
+        EntityBase {
+            entityId: "tableWalls"
+            entityType: "tableWalls"
+
+            BoxCollider {
+                x: 0
+                y: 0
+                width:scene.wallsWidth
+                height:gameWindow.height
+                bodyType: Body.Static
+            }
+            BoxCollider {
+                x:gameWindow.width - scene.wallsWidth
+                y: 0
+                width:scene.wallsWidth
+                height:gameWindow.height
+                bodyType: Body.Static
+            }
+            BoxCollider {
+                x: 0
+                y: 0
+                width:(gameWindow.width / 2) - scene.redCircleRadius - scene.tableCornerRadius
+                height:scene.wallsWidth
+                bodyType: Body.Static
+            }
+            CircleCollider {
+                x: (gameWindow.width / 2) - scene.redCircleRadius - (scene.tableCornerRadius * 2)
+                y: -scene.tableCornerRadius
+                radius: scene.tableCornerRadius
+                bodyType: Body.Static
+            }
+            BoxCollider {
+                x: (gameWindow.width / 2) + scene.redCircleRadius + scene.tableCornerRadius
+                y: 0
+                width:(gameWindow.width / 2) - scene.redCircleRadius - scene.tableCornerRadius
+                height:scene.wallsWidth
+                bodyType: Body.Static
+            }
+            CircleCollider {
+                x: (gameWindow.width / 2) + scene.redCircleRadius
+                y: -scene.tableCornerRadius
+                radius: scene.tableCornerRadius
+                bodyType: Body.Static
+            }
+            BoxCollider {
+                x: 0
+                y: table.height - scene.wallsWidth
+                width:(gameWindow.width / 2) - scene.redCircleRadius - scene.tableCornerRadius
+                height:scene.wallsWidth
+                bodyType: Body.Static
+            }
+            CircleCollider {
+                x: (gameWindow.width / 2) - scene.redCircleRadius - (scene.tableCornerRadius * 2)
+                y: table.height - scene.wallsWidth
+                radius: scene.tableCornerRadius
+                bodyType: Body.Static
+            }
+            BoxCollider {
+                x: (gameWindow.width / 2) + scene.redCircleRadius + scene.tableCornerRadius
+                y: table.height - scene.wallsWidth
+                width:(gameWindow.width / 2) - scene.redCircleRadius - scene.tableCornerRadius
+                height:scene.wallsWidth
+                bodyType: Body.Static
+            }
+            CircleCollider {
+                x: (gameWindow.width / 2) + scene.redCircleRadius
+                y: table.height - scene.wallsWidth
+                radius: scene.tableCornerRadius
+                bodyType: Body.Static
+            }
+        }
+
+        EntityBase {
+            entityId: "malletLimits"
+            BoxCollider {
+                categories: Box.Category2
+                y: table.height / 2 - 3
+                x: 0
+                height: 6
+                width: gameWindow.width
+                bodyType: Body.Static
+            }
+            BoxCollider {
+                categories: Box.Category2
+                y: table.height - scene.wallsWidth
+                x: 0
+                height: scene.wallsWidth
+                width: gameWindow.width
+                bodyType: Body.Static
+            }
+            BoxCollider {
+                categories: Box.Category2
+                y: 0
+                x: 0
+                height: scene.wallsWidth
+                width: gameWindow.width
+                bodyType: Body.Static
             }
         }
     }
